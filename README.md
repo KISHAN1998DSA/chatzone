@@ -1,11 +1,11 @@
 # ChatZone - AI Chat Web Application
 
-ChatZone is a full-stack web application that allows users to chat with an AI assistant. Built with React, TypeScript, and Supabase, it provides a clean and intuitive interface for having conversations with AI.
+ChatZone is a full-stack web application that allows users to chat with an AI assistant. Built with React, TypeScript, and Supabase, it provides a clean and intuitive interface for having conversations with Google's Generative AI.
 
 ## Features
 
 - 🔐 User authentication (signup/login)
-- 💬 Chat interface with AI responses
+- 💬 Chat interface with Google AI responses
 - 📚 Chat history storage
 - 🎨 Modern UI with shadcn/ui components
 - 🚀 Responsive design with Tailwind CSS
@@ -21,9 +21,10 @@ ChatZone is a full-stack web application that allows users to chat with an AI as
 - Framer Motion for animations
 - React Router for navigation
 
-### Backend
+### Backend & AI
 - Supabase for authentication
 - Supabase Realtime Database for storing chats and messages
+- Google Generative AI API for generating AI responses
 
 ## Getting Started
 
@@ -31,6 +32,7 @@ ChatZone is a full-stack web application that allows users to chat with an AI as
 - Node.js (v16+)
 - npm or yarn
 - A Supabase account
+- A Google AI API key
 
 ### Setup
 
@@ -47,13 +49,16 @@ npm install
 
 3. Create a Supabase project and get your API keys.
 
-4. Update the Supabase configuration in `src/lib/supabase.ts`:
-```typescript
-const supabaseUrl = 'YOUR_SUPABASE_URL';
-const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+4. Get a Google AI API key from the Google AI Studio (https://ai.google.dev/).
+
+5. Create a `.env` file in the root directory with the following variables:
+```
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_GOOGLE_AI_API_KEY=your-google-ai-api-key
 ```
 
-5. Set up your Supabase database with the following tables:
+6. Set up your Supabase database with the following tables:
 
 ```sql
 -- Create users table (handled by Supabase Auth)
@@ -100,37 +105,24 @@ CREATE POLICY "Users can view messages in their chats" ON messages
   );
 ```
 
-6. Start the development server:
+7. Run the development server:
 ```bash
 npm run dev
 ```
 
-7. Open your browser and navigate to `http://localhost:5173/`
+8. Open your browser and navigate to `http://localhost:5173`
 
-## Folder Structure
+## Environment Variables
 
-```
-chatzone/
-├── public/
-├── src/
-│   ├── components/
-│   │   ├── auth/         # Authentication components
-│   │   ├── chat/         # Chat interface components
-│   │   ├── dashboard/    # Dashboard components
-│   │   ├── layout/       # Layout components
-│   │   └── ui/           # Reusable UI components
-│   ├── contexts/         # React context providers
-│   ├── hooks/            # Custom React hooks
-│   ├── lib/              # Utilities and libraries
-│   ├── pages/            # Page components
-│   ├── App.tsx           # Main App component
-│   └── main.tsx          # Entry point
-└── ...                   # Config files
-```
+| Variable | Description |
+|----------|-------------|
+| VITE_SUPABASE_URL | Your Supabase project URL |
+| VITE_SUPABASE_ANON_KEY | Your Supabase anonymous key |
+| VITE_GOOGLE_AI_API_KEY | Your Google AI API key |
 
 ## License
 
-MIT
+This project is licensed under the MIT License.
 
 ---
 

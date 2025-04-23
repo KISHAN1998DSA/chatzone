@@ -2,20 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Chat, Message } from '../lib/supabase';
 import { useAuth } from './AuthContext';
-
-// Random AI responses for demonstration
-const AI_RESPONSES = [
-  "I'm thinking about that, give me a moment...",
-  "That's an interesting question!",
-  "I don't have all the answers, but here's what I think.",
-  "Let me search my knowledge base for that...",
-  "Have you considered looking at the problem from a different angle?",
-  "That's a great point! Here's another perspective to consider.",
-  "I'm not entirely sure, but my best guess would be...",
-  "According to my training, the answer might be...",
-  "I'm learning too, and that's a fascinating topic!",
-  "Let me help you think through this problem."
-];
+import { generateAIResponse } from '../lib/googleAI';
 
 interface ChatContextProps {
   chats: Chat[];
@@ -61,7 +48,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         filter: `chat_id=eq.${currentChat.id}`
       }, (payload) => {
         const newMessage = payload.new as Message;
-        setMessages(prev => [...prev, newMessage]);
+        // Check if message already exists in state to avoid duplicates
+        setMessages(prev => {
+          const messageExists = prev.some(msg => msg.id === newMessage.id);
+          if (messageExists) {
+            return prev;
+          }
+          return [...prev, newMessage];
+        });
       })
       .subscribe();
 
@@ -149,34 +143,46 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       // Insert user message
-      const { error: userMessageError } = await supabase
+      const { data: userData, error: userMessageError } = await supabase
         .from('messages')
         .insert([{
           chat_id: currentChat.id,
           content,
           sender: 'user',
-        }]);
+        }])
+        .select('*')
+        .single();
       
       if (userMessageError) throw userMessageError;
       
-      // Generate random AI response
-      const aiResponse = AI_RESPONSES[Math.floor(Math.random() * AI_RESPONSES.length)];
+      // Update local messages state with user message
+      if (userData) {
+        setMessages(prev => [...prev, userData]);
+      }
       
-      // Simulate AI processing time
-      setTimeout(async () => {
-        const { error: aiMessageError } = await supabase
-          .from('messages')
-          .insert([{
-            chat_id: currentChat.id,
-            content: aiResponse,
-            sender: 'ai',
-          }]);
-        
-        if (aiMessageError) console.error('Error sending AI message:', aiMessageError);
-        setLoading(false);
-      }, 1000);
+      // Generate AI response using Google AI API
+      const aiResponse = await generateAIResponse(content);
+      
+      // Insert AI response (handle undefined case)
+      const { data: aiData, error: aiMessageError } = await supabase
+        .from('messages')
+        .insert([{
+          chat_id: currentChat.id,
+          content: aiResponse || "I couldn't generate a response at this time.",
+          sender: 'ai',
+        }])
+        .select('*')
+        .single();
+      
+      if (aiMessageError) {
+        console.error('Error sending AI message:', aiMessageError);
+      } else if (aiData) {
+        // Update local messages state with AI response
+        setMessages(prev => [...prev, aiData]);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
+    } finally {
       setLoading(false);
     }
   };

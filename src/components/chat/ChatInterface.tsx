@@ -8,6 +8,23 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { ArrowLeft, Send, Bot, User, RotateCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Function to format message content with proper line breaks and code blocks
+const formatMessageContent = (content: string) => {
+  // Split the content by newlines
+  const lines = content.split('\n');
+  
+  return (
+    <>
+      {lines.map((line, index) => (
+        <React.Fragment key={index}>
+          {line}
+          {index < lines.length - 1 && <br />}
+        </React.Fragment>
+      ))}
+    </>
+  );
+};
+
 const ChatInterface = () => {
   const { chatId } = useParams<{ chatId: string }>();
   const { user } = useAuth();
@@ -21,7 +38,7 @@ const ChatInterface = () => {
     if (chatId) {
       selectChat(chatId);
     }
-  }, [chatId, selectChat]);
+  }, [chatId]);
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -34,8 +51,11 @@ const ChatInterface = () => {
 
     setSending(true);
     try {
-      await sendMessage(messageInput);
+      // Clear input immediately to improve UX
+      const messageToSend = messageInput.trim();
       setMessageInput('');
+      
+      await sendMessage(messageToSend);
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
@@ -92,7 +112,7 @@ const ChatInterface = () => {
             <Bot className="h-12 w-12 text-primary/60 mb-4" />
             <h3 className="text-xl font-semibold">Start a conversation</h3>
             <p className="text-muted-foreground mt-2 max-w-md">
-              Send a message to begin chatting with the AI assistant.
+              Send a message to begin chatting with the Google AI assistant.
             </p>
           </div>
         ) : (
@@ -138,7 +158,7 @@ const ChatInterface = () => {
                           : 'bg-muted'
                       }`}
                     >
-                      {message.content}
+                      {formatMessageContent(message.content)}
                     </div>
                     <p className="text-xs text-muted-foreground px-1">
                       {formatTime(message.created_at)}
@@ -162,6 +182,7 @@ const ChatInterface = () => {
           >
             <div className="flex items-start gap-2 max-w-[80%]">
               <Avatar className="mt-0.5">
+                <AvatarImage src="/bot-avatar.png" />
                 <AvatarFallback>
                   <Bot className="h-5 w-5" />
                 </AvatarFallback>
