@@ -1,4 +1,3 @@
-import React from 'react';
 import ChatList from '../components/dashboard/ChatList';
 import Navbar from '../components/layout/Navbar';
 

@@ -7,6 +7,3 @@ export const APP_CONFIG = {
     SUPABASE_ANON_KEY: supabaseAnonKey,
     GOOGLE_AI_API_KEY: googleApiKey,
 }
-
-
-
